@@ -3,6 +3,9 @@ load_dotenv()
 
 import requests
 import os
+import sys
+
+from typing import Callable
 
 import time
 
@@ -76,7 +79,7 @@ def create_talk(image_url: str, audio_url: str) -> str:
 
     return response_dict['id']
 
-def get_talk(talk_id:str) -> str:
+def get_talk(talk_id:str, retry_counter: int = 0) -> str:
 
     import requests
 
@@ -91,29 +94,43 @@ def get_talk(talk_id:str) -> str:
 
     response_dict = response.json()
 
+    if response_dict['status'] == 'error':
+        if response_dict['error']['kind'] == 'FaceError':
+            print('face detect error, recreating face')
+            return False, None
+
     if 'result_url' not in response_dict:
+        print(f'video not ready yet, retrying: {retry_counter}')
         time.sleep(2)
-        return get_talk(talk_id)
+        retry_counter +=1
+        return get_talk(talk_id, retry_counter)
     
-    return response_dict['result_url']
+    return  True, response_dict['result_url']
 
 def download_bytes(url):
     response = requests.get(url)
     response.raise_for_status()  # Ensure we got a successful response
     return response.content  
 
-def get_video_for(img_path: str, audio_path: str) -> bytes:
+def get_video_for(image_file_getter: Callable[[], str], audio_path: str) -> bytes:
     
+    img_path = image_file_getter()
+
     image_url = upload_image(img_path)
     audio_url = upload_audio(audio_path)
 
     talk_id = create_talk(image_url, audio_url)
 
-    vid_url = get_talk(talk_id)
+    print(f'waiting for talk: {talk_id}')
 
-    video_bytes = download_bytes(vid_url)
+    success, vid_url = get_talk(talk_id)
 
-    return video_bytes
+    if success :
+        video_bytes = download_bytes(vid_url)
+        return video_bytes
+    else :
+        return get_video_for(image_file_getter, audio_path)
+    
 
 if __name__ == '__main__':
 

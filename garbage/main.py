@@ -1,4 +1,4 @@
-from garbage.session import Session
+from garbage.session.session import Session
 
 if __name__ == '__main__':
 

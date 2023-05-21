@@ -1,0 +1,1 @@
+voices_on_file = ['dwarf','female_elf','goblin','male_vampire','orc','troll']

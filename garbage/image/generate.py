@@ -1,12 +1,12 @@
 import base64
 import os
 import requests
-import json
 from dotenv import load_dotenv
 load_dotenv()
 
-from garbage.conversation.models import Character 
-from garbage.conversation.random_character import new_character 
+from typing import Callable
+
+from garbage.conversation.conversation import Character 
 
 from garbage.image.template import prompt
 
@@ -17,11 +17,16 @@ api_key = os.getenv('STABILITY_API_KEY')
 if api_key is None:
     raise Exception("Missing Stability API key.")
 
-def generate(character: Character) -> str:
+def portrait_getter(character: Character, base_path: str) -> Callable[[], str]:
+
+    getter_func = lambda :generate(character, base_path)
+
+    return getter_func
+
+def generate(character: Character, base_path: str) -> str:
 
     formatted = prompt.format(
         race = character.race,
-        occupation = character.occupation
     )
 
     response = requests.post(
@@ -53,7 +58,7 @@ def generate(character: Character) -> str:
     data = response.json()
 
     for i, image in enumerate(data["artifacts"]):
-        img_path = f"images/{character.name}.png"
+        img_path = f"{base_path}/image/{character.name}.png"
         with open(img_path, "wb") as f:
             f.write(base64.b64decode(image["base64"]))
 
@@ -63,12 +68,7 @@ if __name__ == '__main__':
 
     character = Character(
         name='bob',
-        race='Elf',
-        occupation='Wizard',
-        emotional_state='',
-        obssessed_with=[],
-        has_distate_for=[]
-
+        voice='Elf'
     )
 
     generate(character)

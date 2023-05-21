@@ -1,4 +1,4 @@
-from elevenlabs import set_api_key
+from elevenlabs import set_api_key, Voice
 from dotenv import load_dotenv
 import os
 load_dotenv()
@@ -9,8 +9,8 @@ set_api_key(api_key)
 from elevenlabs import clone, generate, play, voices
 import glob
 
-def retrieve(name: str):
-
+def retrieve(name: str) -> Voice:
+ 
     my_voices = voices()
 
     filtered = [voice for voice in my_voices if voice.name == name]
@@ -20,7 +20,7 @@ def retrieve(name: str):
     else:
         return None
 
-def clone_voice(name:str):
+def clone_voice(name:str) -> Voice:
         
     voice = retrieve(name)
 
@@ -41,12 +41,12 @@ def clone_voice(name:str):
 
     return voice
 
-def generate_audio(voice, text):
+def generate_audio(voice: Voice, text: str) -> bytes:
     audio = generate(text=text, voice=voice)
 
     return audio
 
-def generate_audio_for_name(voice_name: str, text):
+def generate_audio_for_name(voice_name: str, text) -> bytes:
 
     voice = clone_voice(voice_name)
 
