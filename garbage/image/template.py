@@ -1,12 +1,12 @@
 from langchain.prompts import PromptTemplate
 
 template = '''
-Headshot with upper body of a {race}.
+Profile picture of a {race} named {name}.
 
-Human-like face. 
+Looking straight at the camera.
 '''
 
 prompt = PromptTemplate(
     template=template,
-    input_variables=['race']
+    input_variables=['race', 'name']
 )

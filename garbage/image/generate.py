@@ -27,6 +27,7 @@ def generate(character: Character, base_path: str) -> str:
 
     formatted = prompt.format(
         race = character.race,
+        name = character.name
     )
 
     response = requests.post(

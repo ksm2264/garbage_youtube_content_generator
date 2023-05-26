@@ -5,7 +5,7 @@ import os
 
 import pymongo
 
-from garbage.conversation.conversation import Message, Conversation
+from garbage.conversation.conversation import Conversation
 from garbage.conversation.llm import new_conversation, mock_conversation
 from garbage.conversation.voices import voices_on_file
 
@@ -16,11 +16,11 @@ from garbage.image.generate import portrait_getter
 from garbage.session.audio import AudioStore
 
 from garbage.session.video import VideoStore
-from garbage.video.talking_face import get_video_for
+from garbage.video.gooey import get_video_for as gooey_get_video_for
+from garbage.video.gooey import get_video_for as did_get_video_for
 
 from garbage.session.image import ImageStore
 
-from garbage.video.join import join_video_clips
 
 client = pymongo.MongoClient("mongodb://localhost:27017/")
 db = client['garbage']
@@ -71,7 +71,8 @@ class Session(BaseModel):
         image_file_getter_a = portrait_getter(self.character_a.character, self.base_path())
         character_a_audio_file = self.audio.joined_files[character_a_name].file
 
-        video_a_bytes = get_video_for(image_file_getter_a, character_a_audio_file)
+        # todo: set up using gooey vs did as a flag
+        video_a_bytes = gooey_get_video_for(image_file_getter_a, character_a_audio_file)
 
         self.video.add_video_a(character_a_name, video_a_bytes, self.base_path())
 
@@ -80,7 +81,7 @@ class Session(BaseModel):
         image_file_getter_b = portrait_getter(self.character_b.character, self.base_path())
         character_b_audio_file = self.audio.joined_files[character_b_name].file
 
-        video_b_bytes = get_video_for(image_file_getter_b, character_b_audio_file)
+        video_b_bytes = gooey_get_video_for(image_file_getter_b, character_b_audio_file)
 
         self.video.add_video_b(character_b_name, video_b_bytes, self.base_path())
 
@@ -122,10 +123,10 @@ class Session(BaseModel):
     @staticmethod
     def new() -> 'Session':
 
-        voice_a, voice_b = np.random.choice(voices_on_file, 2)
-        conversation = new_conversation(voice_a, voice_b)
+        # voice_a, voice_b = np.random.choice(voices_on_file, 2)
+        # conversation = new_conversation(voice_a, voice_b)
 
-        # conversation = mock_conversation()
+        conversation = mock_conversation()
 
         # todo: make this a readable thing like twitch clips
         name = uuid.uuid4()
